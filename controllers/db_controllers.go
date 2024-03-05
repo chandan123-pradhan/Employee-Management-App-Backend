@@ -27,7 +27,7 @@ func init() {
 	fmt.Println("Connections instant is ready")
 }
 
-func addEmployeesInDb(employee models.Employee) bool {
+func addEmployeesInDb(employee models.User) bool {
 	_, err := collection.InsertOne(context.Background(), employee)
 	return helpers.CheckIfNull(err)
 
@@ -47,4 +47,29 @@ func getAllEmployeesFromDb() []primitive.M {
 	}
 	defer cur.Close(context.Background())
 	return employees
+}
+
+
+func deleteEmployee(employeeId string)  {
+	id, _ := primitive.ObjectIDFromHex(employeeId)
+	filter := bson.M{"_id":id}
+	deleteCount, err :=  collection.DeleteOne(context.Background(),filter)
+	helpers.CheckIfNull(err)
+	fmt.Println("Employee deleted, with count =", deleteCount)
+}
+
+
+
+func updateUserWalletAmount(userId string, currentAmount string ) bool {
+	id , err:= primitive.ObjectIDFromHex(userId)
+	if(err!=nil){
+		fmt.Println("user id not found")
+		return false
+	}
+	filter := bson.M{"_id":id}
+	update := bson.M{"$set":bson.M{"walletamount":currentAmount}}
+	_, e := collection.UpdateOne(context.Background(),filter,update)
+	return helpers.CheckIfNull(e)
+
+
 }
