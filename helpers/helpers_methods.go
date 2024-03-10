@@ -49,3 +49,15 @@ func OperationSuccessWithData(w http.ResponseWriter, data []primitive.M ) {
 
 	json.NewEncoder(w).Encode(baseResponse)
 }
+
+
+
+func OperationSuccessWithObject(w http.ResponseWriter, data models.User ) {
+	var baseResponse = models.BaseResponse{
+		StatusCode: 200,
+		Message:    "Employees List Fetchded successfully done",
+		Data:       data,
+	}
+
+	json.NewEncoder(w).Encode(baseResponse)
+}

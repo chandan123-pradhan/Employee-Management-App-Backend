@@ -28,48 +28,62 @@ func init() {
 }
 
 func addEmployeesInDb(employee models.User) bool {
-	_, err := collection.InsertOne(context.Background(), employee)
+	res, err := collection.InsertOne(context.Background(), employee)
+	fmt.Println(res.InsertedID);
 	return helpers.CheckIfNull(err)
 
 }
 
-
 func getAllEmployeesFromDb() []primitive.M {
-	cur, err := collection.Find(context.Background(),bson.M{})
+	cur, err := collection.Find(context.Background(), bson.M{})
 	helpers.CheckIfNull(err)
 	var employees []primitive.M
 
-	for cur.Next(context.Background()){
+	for cur.Next(context.Background()) {
 		var employee bson.M
 		err := cur.Decode(&employee)
 		helpers.CheckIfNull(err)
-		employees=append(employees, employee)
+		employees = append(employees, employee)
 	}
 	defer cur.Close(context.Background())
 	return employees
 }
 
-
-func deleteEmployee(employeeId string)  {
+func deleteEmployee(employeeId string) {
 	id, _ := primitive.ObjectIDFromHex(employeeId)
-	filter := bson.M{"_id":id}
-	deleteCount, err :=  collection.DeleteOne(context.Background(),filter)
+	filter := bson.M{"_id": id}
+	deleteCount, err := collection.DeleteOne(context.Background(), filter)
 	helpers.CheckIfNull(err)
 	fmt.Println("Employee deleted, with count =", deleteCount)
 }
 
-
-
-func updateUserWalletAmount(userId string, currentAmount string ) bool {
-	id , err:= primitive.ObjectIDFromHex(userId)
-	if(err!=nil){
+func updateUserWalletAmount(userId string, currentAmount string) bool {
+	id, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
 		fmt.Println("user id not found")
 		return false
 	}
-	filter := bson.M{"_id":id}
-	update := bson.M{"$set":bson.M{"walletamount":currentAmount}}
-	_, e := collection.UpdateOne(context.Background(),filter,update)
+	filter := bson.M{"_id": id}
+	update := bson.M{"$set": bson.M{"walletamount": currentAmount}}
+	_, e := collection.UpdateOne(context.Background(), filter, update)
 	return helpers.CheckIfNull(e)
 
+}
 
+func getUserDetails(userId string) models.User {
+	id, err := primitive.ObjectIDFromHex(userId)
+	helpers.CheckIfNull(err)
+	filter := bson.M{"_id": id}
+
+	var user models.User
+	err = collection.FindOne(context.Background(), filter).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// Handle case where user with given userID is not found
+			helpers.CheckIfNull(err)
+		}
+
+	}
+
+	return user
 }
